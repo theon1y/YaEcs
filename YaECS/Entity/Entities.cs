@@ -5,6 +5,7 @@ namespace YaEcs
 {
     public class Entities : IEnumerable<Entity>
     {
+        internal readonly Entity Singleton = new(0);
         private readonly HashSet<Entity> storage = new();
         private uint lastId;
 

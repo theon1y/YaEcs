@@ -95,21 +95,17 @@ namespace Tests.Ecs
             
             public void Execute(YaEcs.World world)
             {
-                emptyEntity = world.CreateEntity();
-                
-                transformEntity = world.CreateEntity();
-                world.AddComponent(transformEntity, new TransformComponent { Position = Vector123 });
+                emptyEntity = world.Create();
 
-                stillEntity = world.CreateEntity();
-                world.AddComponent(stillEntity, new MoveDirectionComponent());
+                transformEntity = world.Create(new TransformComponent { Position = Vector123 });
 
-                moveEntityUp = world.CreateEntity();
-                world.AddComponent(moveEntityUp, new TransformComponent { Position = Vector3.Zero });
-                world.AddComponent(moveEntityUp, new MoveDirectionComponent { Direction = Vector3.UnitY });
+                stillEntity = world.Create(new MoveDirectionComponent());
 
-                moveEntityRight = world.CreateEntity();
-                world.AddComponent(moveEntityRight, new TransformComponent { Position = Vector3.Zero });
-                world.AddComponent(moveEntityRight, new MoveDirectionComponent { Direction = Vector3.UnitX });
+                moveEntityUp = world.Create(new TransformComponent { Position = Vector3.Zero },
+                    new MoveDirectionComponent { Direction = Vector3.UnitY });
+
+                moveEntityRight = world.Create(new TransformComponent { Position = Vector3.Zero },
+                    new MoveDirectionComponent { Direction = Vector3.UnitX });
             }
         }
 
@@ -119,14 +115,10 @@ namespace Tests.Ecs
             
             public void Execute(YaEcs.World world)
             {
-                foreach (var entity in world.Entities)
+                world.ForEach<TransformComponent, MoveDirectionComponent>((_, transform, move) =>
                 {
-                    if (world.TryGetComponent<TransformComponent>(entity, out var transform)
-                        && world.TryGetComponent<MoveDirectionComponent>(entity, out var move))
-                    {
-                        transform.Position += move.Direction;
-                    }
-                }
+                    transform.Position += move.Direction;
+                });
             }
         }
 

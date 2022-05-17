@@ -36,5 +36,17 @@
             var type = typeof(T);
             return world.Components.Remove(entity, type);
         }
+        
+        public static void AddSingleton<T1>(this World world, T1 component)
+            where T1 : IComponent
+        {
+            world.AddComponent(world.Entities.Singleton, component);
+        }
+        
+        public static bool TryGetSingleton<T1>(this World world, out T1 component)
+            where T1 : IComponent
+        {
+            return world.TryGetComponent(world.Entities.Singleton, out component);
+        }
     }
 }
