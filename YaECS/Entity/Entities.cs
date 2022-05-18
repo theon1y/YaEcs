@@ -3,11 +3,12 @@ using System.Collections.Generic;
 
 namespace YaEcs
 {
-    public class Entities : IEnumerable<Entity>
+    public class Entities : IEntities
     {
-        internal readonly Entity Singleton = new(0);
         private readonly HashSet<Entity> storage = new();
         private uint lastId;
+        
+        public Entity Singleton { get; } = new(0);
 
         public Entity Create()
         {

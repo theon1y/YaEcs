@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace YaEcs
 {
-    public class Components : IEnumerable<KeyValuePair<uint, IComponent>>
+    public partial class Components : IComponents
     {
         private readonly Dictionary<Type, Dictionary<uint, IComponent>> storage = new();
 
@@ -46,66 +46,12 @@ namespace YaEcs
 
         public IEnumerator<KeyValuePair<uint, IComponent>> GetEnumerator()
         {
-            return new ComponentsEnumerator(this);
+            return new ComponentEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-        
-        private struct ComponentsEnumerator : IEnumerator<KeyValuePair<uint, IComponent>>
-        {
-            private readonly Components source;
-            private IEnumerator<KeyValuePair<Type, Dictionary<uint, IComponent>>> typeEnumerator;
-            private IEnumerator<KeyValuePair<uint, IComponent>>? componentEnumerator;
-            
-            public ComponentsEnumerator(Components components)
-            {
-                source = components;
-                Current = default;
-                componentEnumerator = default;
-                typeEnumerator = source.storage.GetEnumerator();;
-            }
-            
-            public bool MoveNext()
-            {
-                if (componentEnumerator != null && componentEnumerator.MoveNext())
-                {
-                    Current = componentEnumerator.Current;
-                    return true;
-                }
-                
-                if (typeEnumerator.MoveNext())
-                {
-                    componentEnumerator = typeEnumerator.Current.Value.GetEnumerator();
-                    if (componentEnumerator.MoveNext())
-                    {
-                        Current = componentEnumerator.Current;
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            public void Reset()
-            {
-                Current = default;
-                componentEnumerator = default;
-                typeEnumerator.Dispose();
-                typeEnumerator = source.storage.GetEnumerator();
-            }
-
-            public KeyValuePair<uint, IComponent> Current { get; private set; }
-
-            object IEnumerator.Current => Current;
-
-            public void Dispose()
-            {
-                typeEnumerator.Dispose();
-                componentEnumerator?.Dispose();
-            }
         }
     }
 }

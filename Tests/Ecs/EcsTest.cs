@@ -13,12 +13,15 @@ namespace Tests.Ecs
         private readonly CreateEntitiesSystem[] initializeSystems = { new() };
         private readonly MoveSystem[] updateSystems = { new() };
         private readonly DeleteSystem[] disposeSystems = { new() };
-        private readonly UpdateStepRegistry updateStepRegistry = new(new[] { TestUpdateStep });
+        private readonly UpdateStepRegistry registry = new(new[] { TestUpdateStep });
+        private readonly Components components = new();
+        private readonly Entities entities = new();
         
         [Fact]
         public void ShouldCreateWorld()
         {
-            var world = new YaEcs.World(initializeSystems, updateSystems, disposeSystems, updateStepRegistry);
+            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
+            world.Initialize();
             Assert.Equal(5, world.Entities.Count());
 
             var initializeSystem = initializeSystems[0];
@@ -29,7 +32,8 @@ namespace Tests.Ecs
         [Fact]
         public void ShouldMoveEntities()
         {
-            var world = new YaEcs.World(initializeSystems, updateSystems, disposeSystems, updateStepRegistry);
+            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
+            world.Initialize();
             var initializeSystem = initializeSystems[0];
             
             AssertComponent<TransformComponent>(world, initializeSystem.transformEntity,
@@ -61,7 +65,8 @@ namespace Tests.Ecs
         [Fact]
         public void ShouldDeleteEntities()
         {
-            var world = new YaEcs.World(initializeSystems, updateSystems, disposeSystems, updateStepRegistry);
+            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
+            world.Initialize();
             world.Update();
             world.Dispose();
             Assert.Empty(world.Entities);

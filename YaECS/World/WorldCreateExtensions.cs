@@ -4,12 +4,12 @@ namespace YaEcs
 {
     public static class WorldCreateExtensions
     {
-        public static Entity Create(this World world)
+        public static Entity Create(this IWorld world)
         {
             return world.CreateEntity();
         }
         
-        public static Entity Create<T1>(this World world, T1 component)
+        public static Entity Create<T1>(this IWorld world, T1 component)
             where T1 : IComponent
         {
             var entity = world.CreateEntity();
@@ -17,7 +17,7 @@ namespace YaEcs
             return entity;
         }
         
-        public static Entity Create<T1, T2>(this World world, T1 component1, T2 component2)
+        public static Entity Create<T1, T2>(this IWorld world, T1 component1, T2 component2)
             where T1 : IComponent
             where T2 : IComponent
         {
@@ -27,7 +27,7 @@ namespace YaEcs
             return entity;
         }
         
-        public static Entity Create<T1, T2, T3>(this World world, T1 component1, T2 component2, T3 component3)
+        public static Entity Create<T1, T2, T3>(this IWorld world, T1 component1, T2 component2, T3 component3)
             where T1 : IComponent
             where T2 : IComponent
             where T3 : IComponent
@@ -39,7 +39,7 @@ namespace YaEcs
             return entity;
         }
         
-        public static Entity Create<T1, T2, T3, T4>(this World world, T1 component1, T2 component2, T3 component3, T4 component4)
+        public static Entity Create<T1, T2, T3, T4>(this IWorld world, T1 component1, T2 component2, T3 component3, T4 component4)
             where T1 : IComponent
             where T2 : IComponent
             where T3 : IComponent

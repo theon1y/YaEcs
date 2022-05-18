@@ -6,7 +6,7 @@ namespace YaEcs
     public static class WorldForEachExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ForEach<T1>(this World world, Action<Entity, T1> action)
+        public static void ForEach<T1>(this IWorld world, Action<Entity, T1> action)
             where T1 : IComponent
         {
             foreach (var entity in world.Entities)
@@ -19,7 +19,7 @@ namespace YaEcs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ForEach<T1, T2>(this World world, Action<Entity, T1, T2> action)
+        public static void ForEach<T1, T2>(this IWorld world, Action<Entity, T1, T2> action)
             where T1 : IComponent
             where T2 : IComponent
         {
@@ -34,7 +34,7 @@ namespace YaEcs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ForEach<T1, T2, T3>(this World world, Action<Entity, T1, T2, T3> action)
+        public static void ForEach<T1, T2, T3>(this IWorld world, Action<Entity, T1, T2, T3> action)
             where T1 : IComponent
             where T2 : IComponent
             where T3 : IComponent
@@ -51,7 +51,7 @@ namespace YaEcs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ForEach<T1, T2, T3, T4>(this World world, Action<Entity, T1, T2, T3, T4> action)
+        public static void ForEach<T1, T2, T3, T4>(this IWorld world, Action<Entity, T1, T2, T3, T4> action)
             where T1 : IComponent
             where T2 : IComponent
             where T3 : IComponent

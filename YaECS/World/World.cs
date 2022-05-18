@@ -1,34 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace YaEcs
 {
-    public class World : IDisposable
+    public class World : IWorld
     {
-        public readonly Components Components;
-        public readonly Entities Entities;
+        public IComponents Components { get; }
+        public IEntities Entities { get; }
 
-        private readonly UpdateStepRegistry updateStepRegistry;  
+        private readonly UpdateStepRegistry updateStepRegistry;
+        private readonly List<IInitializeSystem> initializeSystems;
         private readonly Dictionary<int, List<ISystem>> updateSystems;
         private readonly List<ISystem> disposeSystems;
 
-        public World(IEnumerable<IInitializeSystem> initializeSystems, IEnumerable<IUpdateSystem> updateSystems,
-            IEnumerable<IDisposeSystem> disposeSystems, UpdateStepRegistry updateStepRegistry)
+        public World(UpdateStepRegistry updateStepRegistry,
+            IEnumerable<IInitializeSystem> initializeSystems,
+            IEnumerable<IUpdateSystem> updateSystems,
+            IEnumerable<IDisposeSystem> disposeSystems,
+            IComponents components, IEntities entities)
         {
             this.updateStepRegistry = updateStepRegistry;
+            this.initializeSystems = initializeSystems.ToList();
             this.updateSystems = updateSystems
                 .GroupBy(x => x.UpdateStep.Priority)
                 .ToDictionary(
                     x => x.Key,
                     x => x.Cast<ISystem>().ToList());
             this.disposeSystems = disposeSystems.Cast<ISystem>().ToList();
-            Components = new Components();
-            Entities = new Entities();
-            Initialize(initializeSystems);
+            Components = components;
+            Entities = entities;
         }
 
-        public void Initialize(IEnumerable<IInitializeSystem> initializeSystems)
+        public void Initialize()
         {
             foreach (var system in initializeSystems)
             {

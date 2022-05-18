@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 using YaEcs;
 
@@ -12,6 +11,8 @@ namespace Tests.World
         private readonly IDisposeSystem[] emptyDispose = { };
         private readonly UpdateStep testUpdateStep = new("Test", 0);
         private readonly UpdateStepRegistry registry;
+        private readonly Entities entities = new();
+        private readonly Components components = new();
 
         public WorldTest()
         {
@@ -21,8 +22,9 @@ namespace Tests.World
         [Fact]
         public void ShouldInitialize()
         {
-            var world = new YaEcs.World(emptyInitialize, emptyUpdate, emptyDispose, registry);
+            var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, emptyDispose, components, entities);
             Assert.NotNull(world);
+            world.Initialize();
         }
         
         [Fact]
@@ -31,7 +33,8 @@ namespace Tests.World
             var initialize = Enumerable.Range(0, 2)
                 .Select(_ => new InitializeSystem())
                 .ToList();
-            var world = new YaEcs.World(initialize, emptyUpdate, emptyDispose, registry);
+            var world = new YaEcs.World(registry, initialize, emptyUpdate, emptyDispose, components, entities);
+            world.Initialize();
             foreach (var system in initialize)
             {
                 Assert.True(system.IsInitialized);
@@ -44,8 +47,9 @@ namespace Tests.World
             var update = Enumerable.Range(0, 2)
                 .Select(_ => new UpdateSystem { UpdateStep = testUpdateStep })
                 .ToList();
-            var wold = new YaEcs.World(emptyInitialize, update, emptyDispose, registry);
-            wold.Update();
+            var world = new YaEcs.World(registry, emptyInitialize, update, emptyDispose, components, entities);
+            world.Initialize();
+            world.Update();
             foreach (var system in update)
             {
                 Assert.Equal(1, system.FramesCount);
@@ -62,7 +66,8 @@ namespace Tests.World
             var system1 = new UpdateSystem { UpdateStep = updateStep1 };
             var system2 = new UpdateOrderSystem { UpdateStep = updateStep2, OtherSystem = system1 };
             var update = new IUpdateSystem[] { system2, system1 };
-            var world = new YaEcs.World(emptyInitialize, update, emptyDispose, updateStepRegistry);
+            var world = new YaEcs.World(updateStepRegistry, emptyInitialize, update, emptyDispose, components, entities);
+            world.Initialize();
             world.Update();
         }
 
@@ -72,7 +77,8 @@ namespace Tests.World
             var dispose = Enumerable.Range(0, 2)
                 .Select(_ => new DisposeSystem())
                 .ToList();
-            var world = new YaEcs.World(emptyInitialize, emptyUpdate, dispose, registry);
+            var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, dispose, components, entities);
+            world.Initialize();
             world.Dispose();
             foreach (var system in dispose)
             {
