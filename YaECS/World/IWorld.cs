@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace YaEcs
 {
-    public interface IWorld : IDisposable
+    public interface IWorld : IAsyncDisposable
     {
         IComponents Components { get; }
         IEntities Entities { get; }
-        void Initialize();
+        Task InitializeAsync();
         void Update();
     }
 }

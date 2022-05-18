@@ -2,6 +2,6 @@
 {
     public interface ISystem
     {
-        void Execute(World world);
+        void Execute(IWorld world);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using Xunit;
 using YaEcs;
 
@@ -21,7 +22,7 @@ namespace Tests.Ecs
         public void ShouldCreateWorld()
         {
             var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
-            world.Initialize();
+            world.InitializeAsync();
             Assert.Equal(5, world.Entities.Count());
 
             var initializeSystem = initializeSystems[0];
@@ -33,7 +34,7 @@ namespace Tests.Ecs
         public void ShouldMoveEntities()
         {
             var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
-            world.Initialize();
+            world.InitializeAsync();
             var initializeSystem = initializeSystems[0];
             
             AssertComponent<TransformComponent>(world, initializeSystem.transformEntity,
@@ -66,9 +67,9 @@ namespace Tests.Ecs
         public void ShouldDeleteEntities()
         {
             var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
-            world.Initialize();
+            world.InitializeAsync();
             world.Update();
-            world.Dispose();
+            world.DisposeAsync();
             Assert.Empty(world.Entities);
             Assert.Empty(world.Components);
         }
@@ -97,8 +98,10 @@ namespace Tests.Ecs
             public YaEcs.Entity stillEntity;
             public YaEcs.Entity moveEntityUp;
             public YaEcs.Entity moveEntityRight;
-            
-            public void Execute(YaEcs.World world)
+
+            public int Priority => 0;
+
+            public Task ExecuteAsync(IWorld world)
             {
                 emptyEntity = world.Create();
 
@@ -111,6 +114,8 @@ namespace Tests.Ecs
 
                 moveEntityRight = world.Create(new TransformComponent { Position = Vector3.Zero },
                     new MoveDirectionComponent { Direction = Vector3.UnitX });
+                
+                return Task.CompletedTask;
             }
         }
 
@@ -118,7 +123,7 @@ namespace Tests.Ecs
         {
             public UpdateStep UpdateStep => TestUpdateStep;
             
-            public void Execute(YaEcs.World world)
+            public void Execute(IWorld world)
             {
                 world.ForEach<TransformComponent, MoveDirectionComponent>((_, transform, move) =>
                 {
@@ -129,12 +134,13 @@ namespace Tests.Ecs
 
         private class DeleteSystem : IDisposeSystem
         {
-            public void Execute(YaEcs.World world)
+            public Task ExecuteAsync(IWorld world)
             {
                 foreach (var entity in world.Entities.ToList())
                 {
                     world.DeleteEntity(entity);
                 }
+                return Task.CompletedTask;
             }
         }
     }

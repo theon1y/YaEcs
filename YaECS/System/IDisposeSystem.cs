@@ -1,6 +1,6 @@
 ﻿namespace YaEcs
 {
-    public interface IDisposeSystem : ISystem
+    public interface IDisposeSystem : IAsyncSystem
     {
         
     }

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using YaEcs;
 
@@ -24,7 +25,7 @@ namespace Tests.World
         {
             var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, emptyDispose, components, entities);
             Assert.NotNull(world);
-            world.Initialize();
+            world.InitializeAsync();
         }
         
         [Fact]
@@ -34,7 +35,7 @@ namespace Tests.World
                 .Select(_ => new InitializeSystem())
                 .ToList();
             var world = new YaEcs.World(registry, initialize, emptyUpdate, emptyDispose, components, entities);
-            world.Initialize();
+            world.InitializeAsync();
             foreach (var system in initialize)
             {
                 Assert.True(system.IsInitialized);
@@ -48,7 +49,7 @@ namespace Tests.World
                 .Select(_ => new UpdateSystem { UpdateStep = testUpdateStep })
                 .ToList();
             var world = new YaEcs.World(registry, emptyInitialize, update, emptyDispose, components, entities);
-            world.Initialize();
+            world.InitializeAsync();
             world.Update();
             foreach (var system in update)
             {
@@ -67,7 +68,7 @@ namespace Tests.World
             var system2 = new UpdateOrderSystem { UpdateStep = updateStep2, OtherSystem = system1 };
             var update = new IUpdateSystem[] { system2, system1 };
             var world = new YaEcs.World(updateStepRegistry, emptyInitialize, update, emptyDispose, components, entities);
-            world.Initialize();
+            world.InitializeAsync();
             world.Update();
         }
 
@@ -78,8 +79,8 @@ namespace Tests.World
                 .Select(_ => new DisposeSystem())
                 .ToList();
             var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, dispose, components, entities);
-            world.Initialize();
-            world.Dispose();
+            world.InitializeAsync();
+            world.DisposeAsync();
             foreach (var system in dispose)
             {
                 Assert.True(system.IsDisposed);
@@ -89,10 +90,13 @@ namespace Tests.World
         private class InitializeSystem : IInitializeSystem
         {
             public bool IsInitialized;
+
+            public int Priority => 0;
             
-            public void Execute(YaEcs.World world)
+            public Task ExecuteAsync(IWorld world)
             {
                 IsInitialized = true;
+                return Task.CompletedTask;
             }
         }
         
@@ -102,7 +106,7 @@ namespace Tests.World
 
             public int FramesCount;
             
-            public void Execute(YaEcs.World world)
+            public void Execute(IWorld world)
             {
                 ++FramesCount;
             }
@@ -114,7 +118,8 @@ namespace Tests.World
             public UpdateSystem OtherSystem;
             
             public int FramesCount;
-            public void Execute(YaEcs.World world)
+            
+            public void Execute(IWorld world)
             {
                 Assert.True(OtherSystem.FramesCount > FramesCount);
                 ++FramesCount;
@@ -125,9 +130,10 @@ namespace Tests.World
         {
             public bool IsDisposed;
             
-            public void Execute(YaEcs.World world)
+            public Task ExecuteAsync(IWorld world)
             {
                 IsDisposed = true;
+                return Task.CompletedTask;
             }
         }
     }

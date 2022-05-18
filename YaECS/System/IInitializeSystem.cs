@@ -1,7 +1,7 @@
 ﻿namespace YaEcs
 {
-    public interface IInitializeSystem : ISystem
+    public interface IInitializeSystem : IAsyncSystem
     {
-        
+        int Priority { get; }
     }
 }

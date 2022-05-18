@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace YaEcs
 {
@@ -11,7 +12,7 @@ namespace YaEcs
         private readonly UpdateStepRegistry updateStepRegistry;
         private readonly List<IInitializeSystem> initializeSystems;
         private readonly Dictionary<int, List<ISystem>> updateSystems;
-        private readonly List<ISystem> disposeSystems;
+        private readonly List<IDisposeSystem> disposeSystems;
 
         public World(UpdateStepRegistry updateStepRegistry,
             IEnumerable<IInitializeSystem> initializeSystems,
@@ -26,16 +27,19 @@ namespace YaEcs
                 .ToDictionary(
                     x => x.Key,
                     x => x.Cast<ISystem>().ToList());
-            this.disposeSystems = disposeSystems.Cast<ISystem>().ToList();
+            this.disposeSystems = disposeSystems.ToList();
             Components = components;
             Entities = entities;
         }
 
-        public void Initialize()
+        public async Task InitializeAsync()
         {
-            foreach (var system in initializeSystems)
+            var initializeGroups = initializeSystems
+                .GroupBy(x => x.Priority)
+                .OrderBy(x => x.Key);
+            foreach (var systems in initializeGroups)
             {
-                system.Execute(this);
+                await ExecuteSystemsAsync(systems);
             }
         }
 
@@ -49,9 +53,9 @@ namespace YaEcs
             }
         }
 
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
-            ExecuteSystems(disposeSystems);
+            return ExecuteSystemsAsync(disposeSystems);
         }
 
         private void ExecuteSystems(List<ISystem> systems)
@@ -60,6 +64,14 @@ namespace YaEcs
             {
                 system.Execute(this);
             }
+        }
+
+        private async ValueTask ExecuteSystemsAsync(IEnumerable<IAsyncSystem> systems)
+        {
+            var tasks = systems
+                .Select(x => x.ExecuteAsync(this))
+                .ToList();
+            await Task.WhenAll(tasks);
         }
     }
 }
