@@ -17,7 +17,7 @@
         
         public static bool AddComponent<T>(this IWorld world, uint entity, T component) where T : IComponent
         {
-            var type = component.GetType();
+            var type = typeof(T);
             return world.Components.Add(entity, type, component);
         }
 
