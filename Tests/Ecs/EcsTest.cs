@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 using YaEcs;
 
@@ -21,7 +23,8 @@ namespace Tests.Ecs
         [Fact]
         public void ShouldCreateWorld()
         {
-            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
+            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             world.InitializeAsync();
             Assert.Equal(5, world.Entities.Count());
 
@@ -33,7 +36,8 @@ namespace Tests.Ecs
         [Fact]
         public void ShouldMoveEntities()
         {
-            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
+            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             world.InitializeAsync();
             var initializeSystem = initializeSystems[0];
             
@@ -66,7 +70,8 @@ namespace Tests.Ecs
         [Fact]
         public void ShouldDeleteEntities()
         {
-            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities);
+            var world = new YaEcs.World(registry, initializeSystems, updateSystems, disposeSystems, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             world.InitializeAsync();
             world.Update();
             world.DisposeAsync();
@@ -134,6 +139,8 @@ namespace Tests.Ecs
 
         private class DeleteSystem : IDisposeSystem
         {
+            public int Priority => 1;
+            
             public Task ExecuteAsync(IWorld world)
             {
                 foreach (var entity in world.Entities.ToList())

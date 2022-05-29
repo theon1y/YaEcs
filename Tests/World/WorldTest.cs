@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 using YaEcs;
 
@@ -23,7 +25,8 @@ namespace Tests.World
         [Fact]
         public void ShouldInitialize()
         {
-            var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, emptyDispose, components, entities);
+            var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, emptyDispose, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             Assert.NotNull(world);
             world.InitializeAsync();
         }
@@ -34,7 +37,8 @@ namespace Tests.World
             var initialize = Enumerable.Range(0, 2)
                 .Select(_ => new InitializeSystem())
                 .ToList();
-            var world = new YaEcs.World(registry, initialize, emptyUpdate, emptyDispose, components, entities);
+            var world = new YaEcs.World(registry, initialize, emptyUpdate, emptyDispose, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             world.InitializeAsync();
             foreach (var system in initialize)
             {
@@ -48,7 +52,8 @@ namespace Tests.World
             var update = Enumerable.Range(0, 2)
                 .Select(_ => new UpdateSystem { UpdateStep = testUpdateStep })
                 .ToList();
-            var world = new YaEcs.World(registry, emptyInitialize, update, emptyDispose, components, entities);
+            var world = new YaEcs.World(registry, emptyInitialize, update, emptyDispose, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             world.InitializeAsync();
             world.Update();
             foreach (var system in update)
@@ -67,7 +72,8 @@ namespace Tests.World
             var system1 = new UpdateSystem { UpdateStep = updateStep1 };
             var system2 = new UpdateOrderSystem { UpdateStep = updateStep2, OtherSystem = system1 };
             var update = new IUpdateSystem[] { system2, system1 };
-            var world = new YaEcs.World(updateStepRegistry, emptyInitialize, update, emptyDispose, components, entities);
+            var world = new YaEcs.World(updateStepRegistry, emptyInitialize, update, emptyDispose, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             world.InitializeAsync();
             world.Update();
         }
@@ -78,7 +84,8 @@ namespace Tests.World
             var dispose = Enumerable.Range(0, 2)
                 .Select(_ => new DisposeSystem())
                 .ToList();
-            var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, dispose, components, entities);
+            var world = new YaEcs.World(registry, emptyInitialize, emptyUpdate, dispose, components, entities,
+                Mock.Of<ILogger<YaEcs.World>>());
             world.InitializeAsync();
             world.DisposeAsync();
             foreach (var system in dispose)
@@ -128,6 +135,7 @@ namespace Tests.World
 
         private class DisposeSystem : IDisposeSystem
         {
+            public int Priority => 0;
             public bool IsDisposed;
             
             public Task ExecuteAsync(IWorld world)
