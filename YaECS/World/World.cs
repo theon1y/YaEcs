@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -62,14 +63,31 @@ namespace YaEcs
         {
             foreach (var system in systems)
             {
-                system.Execute(this);
+                try
+                {
+                    system.Execute(this);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
         }
 
         private async ValueTask ExecuteSystemsAsync(IEnumerable<IAsyncSystem> systems)
         {
             var tasks = systems
-                .Select(x => x.ExecuteAsync(this))
+                .Select(async x =>
+                {
+                    try
+                    {
+                        await x.ExecuteAsync(this);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                })
                 .ToList();
             await Task.WhenAll(tasks);
         }
