@@ -58,9 +58,15 @@ namespace YaEcs
             }
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            return ExecuteSystemsAsync(disposeSystems);
+            var disposeGroups = disposeSystems
+                .GroupBy(x => x.Priority)
+                .OrderBy(x => x.Key);
+            foreach (var systems in disposeGroups)
+            {
+                await ExecuteSystemsAsync(systems);
+            }
         }
 
         private void ExecuteSystems(List<ISystem> systems)

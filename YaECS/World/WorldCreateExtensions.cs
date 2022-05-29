@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace YaEcs
+﻿namespace YaEcs
 {
     public static class WorldCreateExtensions
     {
