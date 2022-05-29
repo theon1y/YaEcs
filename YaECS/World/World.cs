@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace YaEcs
 {
@@ -14,12 +15,14 @@ namespace YaEcs
         private readonly List<IInitializeSystem> initializeSystems;
         private readonly Dictionary<int, List<ISystem>> updateSystems;
         private readonly List<IDisposeSystem> disposeSystems;
+        private readonly ILogger<World> logger;
 
         public World(UpdateStepRegistry updateStepRegistry,
             IEnumerable<IInitializeSystem> initializeSystems,
             IEnumerable<IUpdateSystem> updateSystems,
             IEnumerable<IDisposeSystem> disposeSystems,
-            IComponents components, IEntities entities)
+            IComponents components, IEntities entities,
+            ILogger<World> logger)
         {
             this.updateStepRegistry = updateStepRegistry;
             this.initializeSystems = initializeSystems.ToList();
@@ -31,6 +34,7 @@ namespace YaEcs
             this.disposeSystems = disposeSystems.ToList();
             Components = components;
             Entities = entities;
+            this.logger = logger;
         }
 
         public async Task InitializeAsync()
@@ -69,7 +73,7 @@ namespace YaEcs
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    logger.LogError(e, "An exception occured while executing world systems");
                 }
             }
         }
@@ -85,7 +89,7 @@ namespace YaEcs
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        logger.LogError(e, "An exception occured while executing world async systems");
                     }
                 })
                 .ToList();
