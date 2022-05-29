@@ -1,4 +1,4 @@
-#Yet Another Entity Component System
+# Yet Another Entity Component System
 This is just a simple naive implementation of a ECS pattern:
 
 Entities are ids, Components are data classes, and Systems are stateless
